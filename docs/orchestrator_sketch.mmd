@@ -1,0 +1,52 @@
+---
+title: Orchestrator flow
+---
+stateDiagram-v2
+    [*] --> bert_clf
+    
+    bert_clf: BERT-based classifier
+    state bert_clf {
+        usr_prmpt: User Prompt
+        usr_prmpt --> disc_lm: Intent classification
+        disc_lm: Discriminative LM (<0.5B params)
+
+        i1_prob: Intent 1 proba
+        i2_prob: Intent 2 proba
+        i3_prob: Intent 3 proba
+        i4_prob: Intent 4 proba
+        disc_lm --> i1_prob
+        disc_lm --> i2_prob
+        disc_lm --> i3_prob
+        disc_lm --> i4_prob
+
+        i1_prob --> Entropy
+        i2_prob --> Entropy
+        i3_prob --> Entropy
+        i4_prob --> Entropy
+    }
+
+    state if_state <<choice>>
+    Entropy --> if_state
+
+    if_state --> Certain: entropy < thresh
+    i_pred: Predicted Intent
+    Certain --> i_pred: argmax(intent_probs)
+
+    if_state --> Uncertain: entropy > thresh
+    llm_as_judge: LLM as a judge
+    Uncertain --> llm_as_judge
+    state llm_as_judge {
+        usr_prmpt2: User Prompt
+        gen_lm: Generative LM (~1B params)
+        sys_prmpt: System Prompt
+        sys_prmpt --> gen_lm : Classify context and return structured format
+        usr_prmpt2 --> Context
+        Context --> gen_lm
+        structured_format: Structured Format 
+        gen_lm --> structured_format
+
+    }
+    structured_format --> i_pred: extract field
+    i_agent: Intent Agent
+    i_pred --> i_agent: Route to
+    i_agent --> [*]
