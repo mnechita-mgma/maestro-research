@@ -2,12 +2,19 @@
 title: Orchestrator flow
 ---
 stateDiagram-v2
-    [*] --> bert_clf
+    [*] --> usr_prmpt
     
     bert_clf: BERT-based classifier
+    usr_prmpt: User Prompt
+
+    state chat_join <<join>>
+    usr_prmpt --> chat_join
+
+    chat_history: Chat History
+    chat_join --> chat_history
+    chat_history --> disc_lm: Intent classification
+    
     state bert_clf {
-        usr_prmpt: User Prompt
-        usr_prmpt --> disc_lm: Intent classification
         disc_lm: Discriminative LM (<0.5B params)
 
         i1_prob: Intent 1 proba
@@ -25,14 +32,14 @@ stateDiagram-v2
         i4_prob --> Entropy
     }
 
-    state if_state <<choice>>
-    Entropy --> if_state
+    state entroy_if <<choice>>
+    Entropy --> entroy_if
 
-    if_state --> Certain: entropy < thresh
+    entroy_if --> Certain: entropy < thresh
     i_pred: Predicted Intent
     Certain --> i_pred: argmax(intent_probs)
 
-    if_state --> Uncertain: entropy > thresh
+    entroy_if --> Uncertain: entropy > thresh
     llm_as_judge: LLM as a judge
     Uncertain --> llm_as_judge
     state llm_as_judge {
@@ -49,4 +56,9 @@ stateDiagram-v2
     structured_format --> i_pred: extract field
     i_agent: Intent Agent
     i_pred --> i_agent: Route to
-    i_agent --> [*]
+    i_agent --> Response: Generate
+
+    state response_if <<choice>>
+    Response --> response_if: Check if final
+    response_if --> chat_join: Add to chat history
+    response_if --> [*]: Final response
