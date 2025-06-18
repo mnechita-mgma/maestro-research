@@ -4,7 +4,6 @@ title: Orchestrator flow
 stateDiagram-v2
     [*] --> usr_prmpt
     
-    bert_clf: BERT-based classifier
     usr_prmpt: User Prompt
 
     state chat_join <<join>>
@@ -14,6 +13,15 @@ stateDiagram-v2
     chat_join --> chat_history
     chat_history --> disc_lm: Intent classification
     
+    usr_prmpt --> cot_lm
+    cot_agent: CoT Agent
+    state cot_agent {
+        cot_lm: CoT LM 
+        cot_lm --> Subtasks: Task breakdown
+    }
+    Subtasks --> chat_join
+
+    bert_clf: BERT-based classifier
     state bert_clf {
         disc_lm: Discriminative LM (<0.5B params)
 

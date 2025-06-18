@@ -1,0 +1,44 @@
+architecture-beta
+    group langdev(mdi:language-python)[LangGraph]
+    group llmruntime(logos:openai-icon)[OpenAI compatible LLM Runtime]
+    group perform(mdi:function)[Perform Service]
+
+    service visor(mdi:chat-question-outline)[Visor]
+
+
+    service orchestrator(mdi:language-python)[Orchestrator] in langdev
+
+    service planneragent(mdi:robot-outline)[Planner Agent] in langdev
+    service askagent(mdi:robot-outline)[Fallback Agent] in langdev
+
+    service llm(mdi:brain)[LLM] in llmruntime
+    service apigateway(logos:fastapi-icon)[API Gateway] in llmruntime
+    
+    service tools(mdi:function-variant)[Tools] in perform
+    service mcp(codeicon:mcp)[MCP Server] in perform
+
+    apigateway:B -- T:llm
+
+    mcp:B -[Execute]- T:tools
+
+
+    visor:B -- T:orchestrator
+
+    junction j_A_L
+    junction j_A_C
+    junction j_A_R
+
+    planneragent:B <-- T:j_A_L
+    askagent:B <-- T:j_A_R
+    j_A_L:R -[chat_completion]- L:j_A_C
+    j_A_C:R -- L: j_A_R
+    j_A_C:B --> T:apigateway
+
+    orchestrator:B <--> T:planneragent
+    orchestrator:L <-[get_tools]-> R:mcp
+
+
+    
+    
+
+

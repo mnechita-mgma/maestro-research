@@ -1,0 +1,38 @@
+---
+title: Orchestrator flow
+---
+stateDiagram-v2
+    [*] --> UserPrompt
+    
+
+    UserPrompt --> ChatHistory
+
+
+    ChatHistory --> Planner
+
+    state planner_if <<choice>>
+
+    Planner --> planner_if : Task breakdown
+    
+    planner_if --> Tool : has_tool
+
+    Tool --> ToolRunningService
+
+    planner_if --> LocalLLM : Fallback
+
+    LocalLLM --> TextReponse
+
+
+    state should_continue_check <<choice>>
+
+    ToolRunningService --> ShouldContinue
+    TextReponse --> ShouldContinue
+
+    ShouldContinue --> should_continue_check
+
+    should_continue_check --> [*] : No
+
+    should_continue_check --> ChatHistory : Yes, append
+
+
+
