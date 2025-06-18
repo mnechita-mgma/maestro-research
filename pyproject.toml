@@ -1,0 +1,33 @@
+[project]
+name = "maestro-research"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "flask>=3.1.1",
+    "google-search-results>=2.4.2",
+    "ipywidgets>=8.1.7",
+    "jupyter>=1.1.1",
+    "langchain-community>=0.3.25",
+    "langchain-openai>=0.3.24",
+    "langgraph>=0.4.8",
+    "onnx2torch>=1.5.15",
+    "opik>=1.7.36",
+    "optimum[exporters,onnxruntime]>=1.25.3",
+    "python-dotenv>=1.1.0",
+    "sentencepiece>=0.2.0",
+]
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu126", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+torchvision = [
+  { index = "pytorch-cu126", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
